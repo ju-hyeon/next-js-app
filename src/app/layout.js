@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import './globals.css'
+import { Control } from './Control';
 
 export const metadata = {
   title: 'Web tutorials',
@@ -7,25 +8,23 @@ export const metadata = {
 }
 
 export default async function RootLayout({ children }) {
-  const resp = await fetch(`http://localhost:9999/posts`);
+  //const resp = await fetch(`http://localhost:9999/posts`, { next: { revalidate: 0}}); // 초 단위로 캐시 유지. 0으로 지정시 캐시 사용하지 않음
+  const resp = await fetch(process.env.NEXT_PUBLIC_API_URL + 'posts', { cache: 'no-store' }); // 캐시 사용 X
   const posts = await resp.json();
 
   return (
     <html>
       <body>
         <h1><Link href='/'>WEB</Link></h1>
+        <h3>게시물 목록</h3>
         <ol>
           {posts.map((post)=>{
             return <li key={post.id}><Link href={`/read/${post.id}`}>{post.title}</Link></li>
           })}
         </ol>
         {children}
+        <Control />
 
-        <ul>
-          <li><Link href='/create'>Create</Link></li>
-          <li><Link href='/update/1'>Update</Link></li>
-          <li><input type="button" value="delete"/></li>
-        </ul>
         </body>
     </html>
   )
